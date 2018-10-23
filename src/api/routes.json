@@ -1,0 +1,14 @@
+{
+  "routes": [
+    {
+      "path": "",
+      "component": "main",
+      "children": [
+        {
+          "path": "some-feature",
+          "lazyLoadPath": "feature/"
+        }
+      ]
+    }
+  ]
+}
