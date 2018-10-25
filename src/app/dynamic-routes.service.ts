@@ -1,5 +1,5 @@
 import { MainComponent } from './main.component';
-import { Injectable, Type, NgModule, Compiler } from '@angular/core';
+import { Injectable, Type, Compiler, Inject, getModuleFactory, ModuleWithComponentFactories, Injector } from '@angular/core';
 import {
   CanActivate,
   ActivatedRouteSnapshot,
@@ -10,10 +10,13 @@ import {
   RouterModule
 } from '@angular/router';
 
-import { Observable, from } from 'rxjs';
+import { Observable, from, forkJoin, of } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { FeatureComponent } from './feature.component';
+// import { LAZY_MODULE } from './app.module';
+import { FeatureModule } from './feature.module';
+import { NgModule } from './decorators';
 
 export interface RouteConfig {
   path: string;
@@ -22,9 +25,11 @@ export interface RouteConfig {
   children: RouteConfig[];
 }
 
+// export const LazyModule = NgModule;
+
 @Injectable()
 export class DynamicRoutesService implements CanActivate {
-  constructor(private http: HttpClient, private router: Router, private compiler: Compiler) {}
+  constructor(private http: HttpClient, private router: Router, private compiler: Compiler, private injector: Injector) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -61,15 +66,44 @@ export class DynamicRoutesService implements CanActivate {
   private featureModule(lazyLoadPath: string): Observable<Type<any>> {
     return this.getRoutes(lazyLoadPath)
       .pipe(
+        // switchMap(({ routes }) => {
+        //   let m: Observable<ModuleWithComponentFactories<FeatureModule>>;
+        //   // try {
+        //   //   console.log('AAAA');
+        //   //   const mm = this.injector.get(FeatureModule);
+        //   //   console.log(mm);
+        //   //   // getModuleFactory('feature');
+        //   //   console.log('BBBB');
+
+        //   // } catch (error) {
+        //   //   console.log('EEEEEEEE', error);
+        //   //   m = from(this.compiler.compileModuleAndAllComponentsAsync(FeatureModule));
+        //   //   console.log('DDDDDD');
+        //   //   return forkJoin(of({ routes }), m);
+        //   // }
+        // // m = from(this.compiler.compileModuleAndAllComponentsAsync(FeatureModule));
+
+        //   console.log('!!!!!!!');
+        //   return forkJoin(of({ routes }), m);
+        // }),
         switchMap(({ routes }) => {
-          const featureModule = NgModule({
-            imports: [
-              RouterModule.forChild(routes)
-            ]
-          })(class { });
-          return from(this.compiler.compileModuleAsync(featureModule));
+          // console.log(m);
+          // const ii = m ? [
+          //   FeatureModule,
+          //   RouterModule.forChild(routes)
+          // ] : [
+          //     RouterModule.forChild(routes)
+          //   ];
+            // console.log(ii);
+          // const f = getModuleFactory('feature').create();
+          const f = NgModule({
+            imports: [FeatureModule,
+              RouterModule.forChild(routes)],
+          }) (class { });
+          return from(this.compiler.compileModuleAsync(f));
         }),
         map(m => {
+          console.log(m);
           return m.moduleType;
         })
       );
