@@ -1,5 +1,5 @@
 import { MainComponent } from './main.component';
-import { COMPILER_OPTIONS, CompilerFactory, Compiler } from '@angular/core';
+import { COMPILER_OPTIONS, CompilerFactory, Compiler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
@@ -8,7 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 // import { FeatureComponent } from './feature.component';
 import { JitCompilerFactory } from '@angular/platform-browser-dynamic';
 import { FeatureModule } from './feature.module';
-import {NgModule} from './decorators';
+// import { ResourceLoader } from '../../node_modules/@angular/compiler';
 
 export function createCompiler(compilerFactory: CompilerFactory) {
   return compilerFactory.createCompiler([{useJit: true}]);
@@ -30,6 +30,7 @@ export function createCompiler(compilerFactory: CompilerFactory) {
     RouterModule.forRoot([{ path: '**', component: MainComponent, canActivate: [DynamicRoutesService]}])
   ],
   providers: [
+    // ResourceLoader,
     DynamicRoutesService,
     // { provide: NgModule, useValue: NgModule},
     {provide: COMPILER_OPTIONS, useValue: {}, multi: true},

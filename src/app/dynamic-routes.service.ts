@@ -1,5 +1,5 @@
 import { MainComponent } from './main.component';
-import { Injectable, Type, Compiler, Inject, getModuleFactory, ModuleWithComponentFactories, Injector } from '@angular/core';
+import { Injectable, Type, Compiler, Inject, getModuleFactory, ModuleWithComponentFactories, Injector, NgModule } from '@angular/core';
 import {
   CanActivate,
   ActivatedRouteSnapshot,
@@ -16,7 +16,6 @@ import { HttpClient } from '@angular/common/http';
 import { FeatureComponent } from './feature.component';
 // import { LAZY_MODULE } from './app.module';
 import { FeatureModule } from './feature.module';
-import { NgModule } from './decorators';
 
 export interface RouteConfig {
   path: string;
