@@ -1,5 +1,5 @@
 import { MainComponent } from './main.component';
-import { Injectable, Type, Compiler, Inject, getModuleFactory, ModuleWithComponentFactories, Injector, NgModule } from '@angular/core';
+import { Injectable, Type, Compiler, NgModule } from '@angular/core';
 import {
   CanActivate,
   ActivatedRouteSnapshot,
@@ -10,12 +10,11 @@ import {
   RouterModule
 } from '@angular/router';
 
-import { Observable, from, forkJoin, of } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { FeatureComponent } from './feature.component';
-// import { LAZY_MODULE } from './app.module';
-import { FeatureModule } from './feature.module';
+import { LayoutComponent } from './layout/layout.component';
+import { LayoutModule } from './layout/layout.module';
 
 export interface RouteConfig {
   path: string;
@@ -24,11 +23,9 @@ export interface RouteConfig {
   children: RouteConfig[];
 }
 
-// export const LazyModule = NgModule;
-
 @Injectable()
 export class DynamicRoutesService implements CanActivate {
-  constructor(private http: HttpClient, private router: Router, private compiler: Compiler, private injector: Injector) { }
+  constructor(private http: HttpClient, private router: Router, private compiler: Compiler) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -65,44 +62,17 @@ export class DynamicRoutesService implements CanActivate {
   private featureModule(lazyLoadPath: string): Observable<Type<any>> {
     return this.getRoutes(lazyLoadPath)
       .pipe(
-        // switchMap(({ routes }) => {
-        //   let m: Observable<ModuleWithComponentFactories<FeatureModule>>;
-        //   // try {
-        //   //   console.log('AAAA');
-        //   //   const mm = this.injector.get(FeatureModule);
-        //   //   console.log(mm);
-        //   //   // getModuleFactory('feature');
-        //   //   console.log('BBBB');
-
-        //   // } catch (error) {
-        //   //   console.log('EEEEEEEE', error);
-        //   //   m = from(this.compiler.compileModuleAndAllComponentsAsync(FeatureModule));
-        //   //   console.log('DDDDDD');
-        //   //   return forkJoin(of({ routes }), m);
-        //   // }
-        // // m = from(this.compiler.compileModuleAndAllComponentsAsync(FeatureModule));
-
-        //   console.log('!!!!!!!');
-        //   return forkJoin(of({ routes }), m);
-        // }),
         switchMap(({ routes }) => {
-          // console.log(m);
-          // const ii = m ? [
-          //   FeatureModule,
-          //   RouterModule.forChild(routes)
-          // ] : [
-          //     RouterModule.forChild(routes)
-          //   ];
-            // console.log(ii);
-          // const f = getModuleFactory('feature').create();
+
           const f = NgModule({
-            imports: [FeatureModule,
-              RouterModule.forChild(routes)],
+            imports: [
+              LayoutModule,
+              RouterModule.forChild(routes)
+            ],
           }) (class { });
           return from(this.compiler.compileModuleAsync(f));
         }),
         map(m => {
-          console.log(m);
           return m.moduleType;
         })
       );
@@ -142,8 +112,8 @@ export const mapComponentName = (component: string): Partial<Route> => {
   switch (component) {
     case 'main':
       return { component: MainComponent };
-    case 'feature':
-      return { component: FeatureComponent };
+    case 'someLayout':
+      return { component: LayoutComponent };
     default:
       return {};
   }

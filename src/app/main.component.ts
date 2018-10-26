@@ -5,5 +5,4 @@ import { Component } from '@angular/core';
               <router-outlet></router-outlet>
               <a routerLink="/some-feature">Load feature module</a>`,
 })
-export class MainComponent {
-}
+export class MainComponent {}
