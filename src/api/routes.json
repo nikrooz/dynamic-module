@@ -6,7 +6,7 @@
       "children": [
         {
           "path": "some-feature",
-          "lazyLoadPath": "feature/"
+          "loadChildren": "/feature"
         }
       ]
     }

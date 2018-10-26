@@ -19,7 +19,7 @@ import { LayoutModule } from './layout/layout.module';
 export interface RouteConfig {
   path: string;
   component: string;
-  lazyLoadPath: string;
+  loadChildren: string;
   children: RouteConfig[];
 }
 
@@ -40,7 +40,7 @@ export class DynamicRoutesService implements CanActivate {
   }
 
   private getRoutes(endpoint: string = ''): Observable<{ routes: Route[] }> {
-    return this.http.get<{ routes: RouteConfig[] }>('/api/' + endpoint + 'routes.json').pipe(
+    return this.http.get<{ routes: RouteConfig[] }>('/api' + endpoint + '/routes.json').pipe(
       map(({ routes }) => {
         return { routes: this.mapToValidAngularRoutes(routes || []) };
       })
@@ -49,18 +49,18 @@ export class DynamicRoutesService implements CanActivate {
 
   private mapToValidAngularRoutes(routesConfig: RouteConfig[]): Route[] {
     return routesConfig.map(routeConfig => {
-      const { path, component, lazyLoadPath, children } = routeConfig;
+      const { path, component, loadChildren, children } = routeConfig;
       return {
         ...mapPathOnToRoute(path),
         ...mapChildren(children ? this.mapToValidAngularRoutes(children) : []),
         ...mapComponentName(component),
-        ...mapLazyLoadModule(lazyLoadPath, path, this.featureModule(lazyLoadPath))
+        ...mapLazyLoadModule(loadChildren, path, this.featureModule(loadChildren))
       };
     });
   }
 
-  private featureModule(lazyLoadPath: string): Observable<Type<any>> {
-    return this.getRoutes(lazyLoadPath)
+  private featureModule(loadChildren: string): Observable<Type<any>> {
+    return this.getRoutes(loadChildren)
       .pipe(
         switchMap(({ routes }) => {
 
@@ -88,11 +88,11 @@ export const mapPathOnToRoute = (path: string): Partial<Route> => {
 };
 
 export const mapLazyLoadModule = (
-  lazyLoadPath: string,
+  loadChildren: string,
   path: string,
   featureModule: Observable<Type<any>>
 ): Partial<Route> => {
-  if (lazyLoadPath && featureModule) {
+  if (loadChildren && featureModule) {
     return {
       path: path,
       loadChildren: () => featureModule
